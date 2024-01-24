@@ -1,7 +1,8 @@
 import kaboom from "kaboom"
 
 const FLOOR_HEIGHT = 48;
-const JUMP_FORCE = 800;
+const CELING_HEIGHT = 48;
+const JUMP_FORCE = 400;
 const SPEED = 480;
 
 // initialize context
@@ -28,7 +29,7 @@ scene("game", () => {
     const player = add([
         // list of components
         sprite("bean"),
-        pos(80, 40),
+        pos(80, 200),
         area(),
         body(),
     ]);
@@ -42,39 +43,61 @@ scene("game", () => {
         area(),
         body({ isStatic: true }),
         color(127, 200, 255),
+		"floor"
+    ]);
+ // ceiling
+	add([
+        rect(width(), CELING_HEIGHT),
+        outline(4),
+        pos(0, 0 + CELING_HEIGHT),
+        anchor("botleft"),
+        area(),
+        body({ isStatic: true }),
+        color(127, 200, 255),
+		"ceiling"
     ]);
 
     function jump() {
-        if (player.isGrounded()) {
             player.jump(JUMP_FORCE);
-        }
     }
 
     // jump when user press space
     onKeyPress("space", jump);
     onClick(jump);
 
-    function spawnTree() {
+function spawnStones() {
 
-        // add tree obj
-        add([
-            rect(48, rand(32, 96)),
-            area(),
-            outline(4),
-            pos(width(), height() - FLOOR_HEIGHT),
-            anchor("botleft"),
-            color(255, 180, 255),
-            move(LEFT, SPEED),
-            "tree",
-        ]);
+	// Bottom Stone
+	add([
+		rect(48, rand(32, 96)),
+		area(),
+		outline(4),
+		pos(width(), height() - FLOOR_HEIGHT),
+		anchor("botleft"),
+		color(255, 180, 255),
+		move(LEFT, SPEED, { dir: vec2(0, 1) }), // Update move function to go downwards
+		"tree",
+	]);
 
-        // wait a random amount of time to spawn next tree
-        wait(rand(0.5, 1.5), spawnTree);
+	// Top Stone
+	let heightTop = rand(300, 400);
+	add([
+		rect(48, heightTop),
+		area(),
+		outline(4),
+		pos(width(), CELING_HEIGHT + heightTop), // Update the position calculation
+		anchor("botleft"),
+		color(255, 180, 255),
+		move(LEFT, SPEED, { dir: vec2(0, -1) }), // Update move function to go downwards
+		"tree",
+	]);
 
-    }
+	wait(1.5, spawnStones);
+
+}
 
     // start spawning trees
-    spawnTree();
+    spawnStones();
 
     // lose if player collides with any game obj with tag "tree"
     player.onCollide("tree", () => {
@@ -83,7 +106,19 @@ scene("game", () => {
         burp();
         addKaboom(player.pos);
     });
+	player.onCollide("ceiling", () => {
+		go("lose", score);
+		burp();
+		addKaboom(player.pos);
+	});
 
+
+	player.onCollide("floor", () => {
+		go("lose", score);
+		burp();
+		addKaboom(player.pos);
+	}
+	);
     // keep track of score
     let score = 0;
 
