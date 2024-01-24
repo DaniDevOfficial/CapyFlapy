@@ -2,8 +2,9 @@ import kaboom from "kaboom"
 
 const FLOOR_HEIGHT = 48;
 const CELING_HEIGHT = 48;
-const JUMP_FORCE = 400;
+const JUMP_FORCE = 600;
 const SPEED = 480;
+const GAP_HEIGHT = 200;
 
 // initialize context
 kaboom();
@@ -32,7 +33,7 @@ scene("game", () => {
         pos(80, 200),
         area(),
         body(),
-    ]);
+	]);
 
     // floor
     add([
@@ -66,10 +67,17 @@ scene("game", () => {
     onClick(jump);
 
 function spawnStones() {
-
+	
+	// calculate heights
+	let heightBottomStone = rand(30, height() - FLOOR_HEIGHT - CELING_HEIGHT - GAP_HEIGHT);
+	let heightTopStone = height() -  heightBottomStone - GAP_HEIGHT - CELING_HEIGHT - FLOOR_HEIGHT;
+	console.log("Height: " + height());
+	console.log("Gap Height: " + GAP_HEIGHT);
+	console.log("Bottom Stone: " + heightBottomStone);
+	console.log("Top Stone: " + heightTopStone);
 	// Bottom Stone
 	add([
-		rect(48, rand(32, 96)),
+		rect(48, heightBottomStone),
 		area(),
 		outline(4),
 		pos(width(), height() - FLOOR_HEIGHT),
@@ -82,10 +90,10 @@ function spawnStones() {
 	// Top Stone
 	let heightTop = rand(300, 400);
 	add([
-		rect(48, heightTop),
+		rect(48, heightTopStone),
 		area(),
 		outline(4),
-		pos(width(), CELING_HEIGHT + heightTop), // Update the position calculation
+		pos(width(), CELING_HEIGHT + heightTopStone), // Update the position calculation
 		anchor("botleft"),
 		color(255, 180, 255),
 		move(LEFT, SPEED, { dir: vec2(0, -1) }), // Update move function to go downwards
